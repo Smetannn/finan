@@ -1,0 +1,74 @@
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  box-sizing: border-box;
+}
+
+.inner {
+  width: 100%;
+  max-width: 22rem;
+}
+
+.title {
+  font-family: var(--heading);
+  color: var(--text-h);
+  font-size: 1.75rem;
+  margin: 0 0 1.25rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.input {
+  font: inherit;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.submit {
+  font: inherit;
+  margin-top: 0.25rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  cursor: pointer;
+}
+
+.submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.apiError {
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.footer {
+  margin: 1.25rem 0 0;
+  font-size: 0.95rem;
+}
+
+.footer a {
+  color: var(--accent);
+}

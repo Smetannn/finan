@@ -2,6 +2,7 @@ import { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login as loginRequest } from "../../api/auth";
 import { useAuthStore } from "../../store/authStore";
+import styles from "./Login.module.css";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -27,37 +28,41 @@ export default function Login() {
   }
 
   return (
-    <main className="auth-page">
-      <h1>Вход</h1>
-      <form onSubmit={handleSubmit} className="auth-form">
-        <label>
-          Электронная почта
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-          />
-        </label>
-        <label>
-          Пароль
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-        </label>
-        {error !== null ? <p className="auth-error">{error}</p> : null}
-        <button type="submit" disabled={loading}>
-          {loading ? "Вход…" : "Войти"}
-        </button>
-      </form>
-      <p>
-        Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
-      </p>
+    <main className={styles.page}>
+      <div className={styles.inner}>
+        <h1 className={styles.title}>Вход</h1>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <label className={styles.label}>
+            Электронная почта
+            <input
+              className={styles.input}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+          </label>
+          <label className={styles.label}>
+            Пароль
+            <input
+              className={styles.input}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </label>
+          {error !== null ? <p className={styles.apiError}>{error}</p> : null}
+          <button type="submit" className={styles.submit} disabled={loading}>
+            {loading ? "Вход…" : "Войти"}
+          </button>
+        </form>
+        <p className={styles.footer}>
+          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+        </p>
+      </div>
     </main>
   );
 }
