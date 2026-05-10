@@ -40,7 +40,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.65rem;
+  gap: 0;
   padding: 0 0.75rem;
 }
 
@@ -50,6 +50,24 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  flex-shrink: 0;
+  min-height: 3rem;
+}
+
+/* Обертка: на десктопе display:contents — ссылки и кнопки в сетке navInner; на мобильных — выпадающий блок под строкой логотипа */
+.mobileMenu {
+  display: none;
+}
+
+.mobileMenuOpen {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  padding: 0.35rem 0 0.65rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
 .navBurger {
@@ -91,6 +109,14 @@
   .navBurger {
     display: none;
   }
+
+  .mobileMenu {
+    display: contents;
+  }
+
+  .mobileMenuOpen {
+    display: contents;
+  }
 }
 
 .logo {
@@ -103,35 +129,24 @@
 }
 
 .navLinks {
-  display: none;
-  width: 100%;
+  display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 0;
-  padding: 0.35rem 0 0.5rem;
+  width: 100%;
+  padding: 0;
   margin: 0;
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
-}
-
-.navLinksMobileOpen {
-  display: flex;
+  border-top: none;
 }
 
 @media (min-width: 768px) {
   .navLinks {
-    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     gap: 1.75rem;
     width: auto;
-    padding: 0;
-    border-top: none;
-  }
-
-  .navLinksMobileOpen {
-    display: flex;
   }
 }
 
@@ -204,14 +219,6 @@
 
 .btnPrimarySm:hover {
   filter: brightness(1.08);
-}
-
-@media (max-width: 767px) {
-  .btnGhost,
-  .btnPrimarySm {
-    width: 100%;
-    justify-content: center;
-  }
 }
 
 /* ——— Hero ——— */
@@ -489,17 +496,31 @@
   }
 }
 
-@media (max-width: 768px) {
+/* Планшет и мобильный: шапка sticky, выпадающее меню под строкой логотипа — не перекрывает hero */
+@media (max-width: 767px) {
   :root {
-    --landing-nav-height: 4rem;
+    --landing-nav-height: 3.5rem;
+  }
+
+  .navWrap {
+    position: sticky;
+    top: 0;
+    min-height: 0;
+    padding: 0.3rem 0;
+    align-items: stretch;
   }
 
   .page {
-    padding-top: var(--landing-nav-height);
+    padding-top: 0;
   }
 
   .hero {
-    padding: calc(var(--landing-nav-height) + 3rem) 1rem 3.5rem;
+    margin-top: 0;
+    padding: 5rem 1rem 3.5rem;
+  }
+
+  .heroText {
+    padding-top: 0;
   }
 
   .heroTitle {
@@ -514,13 +535,34 @@
   .heroCtas {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
   }
 
   .btnHeroPrimary,
   .btnHeroSecondary {
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     text-align: center;
     justify-content: center;
+    font-size: 0.9rem;
+    padding: 0.65rem 1rem;
+  }
+
+  .mobileMenu .navActions {
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .mobileMenu .navActions .btnGhost,
+  .mobileMenu .navActions .btnPrimarySm {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
   }
 
   .section {
@@ -549,12 +591,21 @@
 
 @media (max-width: 480px) {
   :root {
-    --landing-nav-height: 3.75rem;
+    --landing-nav-height: 3.25rem;
   }
 
   .navInner {
     padding: 0 0.65rem;
-    gap: 0.5rem;
+  }
+
+  .navRow1 {
+    min-height: 2.75rem;
+  }
+
+  .navBurger {
+    width: 2.35rem;
+    height: 2.35rem;
+    font-size: 1.2rem;
   }
 
   .logo {
@@ -567,7 +618,10 @@
   }
 
   .hero {
-    padding: calc(var(--landing-nav-height) + 2.5rem) 0.75rem 2.75rem;
+    padding-top: max(100px, 3rem);
+    padding-bottom: 2.75rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 
   .heroInner {
@@ -577,11 +631,18 @@
   .heroTitle {
     font-size: clamp(1.65rem, 7vw + 0.25rem, 2.5rem);
     margin-bottom: 0.85rem;
+    line-height: 1.12;
   }
 
   .heroSub {
     font-size: 0.92rem;
     line-height: 1.55;
+  }
+
+  .btnHeroPrimary,
+  .btnHeroSecondary {
+    font-size: 0.875rem;
+    padding: 0.62rem 1rem;
   }
 
   .heroSvg {

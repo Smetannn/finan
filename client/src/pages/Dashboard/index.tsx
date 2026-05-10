@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { fetchBudgetsForMonth } from "../../api/budgets";
 import { fetchCategories } from "../../api/categories";
 import { fetchTransactions, type TransactionRow } from "../../api/transactions";
@@ -35,6 +35,7 @@ function formatDate(iso: string): string {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
@@ -161,6 +162,14 @@ export default function Dashboard() {
     navigate("/login", { replace: true });
   }
 
+  function navPillClass(path: string) {
+    const active =
+      path === "/groups"
+        ? location.pathname === "/groups" || location.pathname.startsWith("/groups/")
+        : location.pathname === path;
+    return active ? `${styles.navPill} ${styles.navPillActive}` : styles.navPill;
+  }
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -168,24 +177,24 @@ export default function Dashboard() {
           <Link to="/dashboard" className={styles.brand}>
             FinanCheck
           </Link>
-          <Link to="/analytics" className={styles.navLink}>
+          <Link to="/analytics" className={navPillClass("/analytics")}>
             Аналитика
           </Link>
-          <Link to="/transactions" className={styles.navLink}>
+          <Link to="/transactions" className={navPillClass("/transactions")}>
             Транзакции
           </Link>
-          <Link to="/budget" className={styles.navLink}>
+          <Link to="/budget" className={navPillClass("/budget")}>
             Бюджет
           </Link>
-          <Link to="/goals" className={styles.navLink}>
+          <Link to="/goals" className={navPillClass("/goals")}>
             Цели
           </Link>
-          <Link to="/groups" className={styles.navLink}>
+          <Link to="/groups" className={navPillClass("/groups")}>
             Группы
           </Link>
         </div>
         <div className={styles.userRow}>
-          <Link to="/profile" className={styles.navLink}>
+          <Link to="/profile" className={navPillClass("/profile")}>
             Профиль
           </Link>
           <span className={styles.userName}>{user?.name ?? "Пользователь"}</span>
@@ -219,26 +228,38 @@ export default function Dashboard() {
             ) : null}
 
             <div className={styles.gridSummary}>
-              <div className={styles.card}>
+              <Link to="/transactions?type=income" className={`${styles.card} ${styles.summaryCard}`}>
                 <div className={styles.cardLabel}>Доходы за месяц</div>
                 <div className={`${styles.cardValue} ${styles.cardValueIncome}`}>{formatMoney(totalIncome)}</div>
-              </div>
-              <div className={styles.card}>
+                <span className={styles.summaryCardArrow} aria-hidden>
+                  →
+                </span>
+              </Link>
+              <Link to="/transactions?type=expense" className={`${styles.card} ${styles.summaryCard}`}>
                 <div className={styles.cardLabel}>Расходы за месяц</div>
                 <div className={`${styles.cardValue} ${styles.cardValueExpense}`}>
                   {formatMoney(totalExpense)}
                 </div>
-              </div>
-              <div className={styles.card}>
+                <span className={styles.summaryCardArrow} aria-hidden>
+                  →
+                </span>
+              </Link>
+              <Link to="/transactions" className={`${styles.card} ${styles.summaryCard}`}>
                 <div className={styles.cardLabel}>Баланс</div>
                 <div className={`${styles.cardValue} ${styles.cardValueBalance}`}>{formatMoney(balance)}</div>
-              </div>
-              <div className={styles.card}>
+                <span className={styles.summaryCardArrow} aria-hidden>
+                  →
+                </span>
+              </Link>
+              <Link to="/analytics" className={`${styles.card} ${styles.summaryCard}`}>
                 <div className={styles.cardLabel}>Норма сбережений</div>
                 <div className={styles.cardValue}>
                   {totalIncome > 0 ? `${savingsRatePct}%` : "—"}
                 </div>
-              </div>
+                <span className={styles.summaryCardArrow} aria-hidden>
+                  →
+                </span>
+              </Link>
             </div>
 
             <div className={styles.twoCol}>

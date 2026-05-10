@@ -49,6 +49,13 @@ const createTransactionSchema = z.object({
   groupId: z.coerce.number().int().positive().optional(),
 });
 
+const patchTransactionSchema = z.object({
+  categoryId: z.coerce.number().int().positive(),
+  amount: z.coerce.number().positive("Сумма должна быть больше нуля"),
+  description: z.union([z.string(), z.null()]).optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Ожидается дата в формате ГГГГ-ММ-ДД"),
+});
+
 router.get("/", async (req, res) => {
   try {
     const userId = res.locals.userId as number;
@@ -201,6 +208,100 @@ router.post("/", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.patch("/:id", async (req, res) => {
+  try {
+    const userId = res.locals.userId as number;
+
+    const id = Number.parseInt(req.params.id ?? "", 10);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Некорректный идентификатор" });
+      return;
+    }
+
+    const [existing] = await db
+      .select({
+        id: transactions.id,
+        type: transactions.type,
+        userId: transactions.userId,
+      })
+      .from(transactions)
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+      .limit(1);
+
+    if (existing === undefined) {
+      res.status(404).json({ error: "Транзакция не найдена" });
+      return;
+    }
+
+    const parsed = patchTransactionSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Некорректные данные", details: parsed.error.flatten() });
+      return;
+    }
+
+    const { categoryId, amount, date } = parsed.data;
+    const descriptionRaw = parsed.data.description;
+    const descriptionNorm =
+      descriptionRaw === undefined
+        ? null
+        : descriptionRaw === null
+          ? null
+          : descriptionRaw.trim() === ""
+            ? null
+            : descriptionRaw.trim();
+
+    const [category] = await db
+      .select({
+        id: categories.id,
+        userId: categories.userId,
+        categoryType: categories.type,
+      })
+      .from(categories)
+      .where(eq(categories.id, categoryId))
+      .limit(1);
+
+    if (category === undefined) {
+      res.status(400).json({ error: "Категория не найдена" });
+      return;
+    }
+
+    const isSystem = category.userId === null;
+    const isOwn = category.userId === userId;
+    if (!isSystem && !isOwn) {
+      res.status(403).json({ error: "Нельзя использовать эту категорию" });
+      return;
+    }
+
+    if (category.categoryType !== existing.type) {
+      res.status(400).json({ error: "Тип категории должен совпадать с типом транзакции" });
+      return;
+    }
+
+    const amountStr = amount.toFixed(2);
+
+    const [row] = await db
+      .update(transactions)
+      .set({
+        categoryId,
+        amount: amountStr,
+        description: descriptionNorm,
+        date,
+      })
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+      .returning();
+
+    if (row === undefined) {
+      res.status(500).json({ error: "Не удалось обновить транзакцию" });
+      return;
+    }
+
+    res.json(row);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 });
 

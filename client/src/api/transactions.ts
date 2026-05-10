@@ -45,3 +45,15 @@ export async function addTransaction(body: AddTransactionInput): Promise<Transac
 export async function deleteTransaction(id: number): Promise<void> {
   await apiClient.delete(`/transactions/${id}`);
 }
+
+export type EditTransactionInput = {
+  categoryId: number;
+  amount: number;
+  description: string | null;
+  date: string;
+};
+
+export async function editTransaction(id: number, body: EditTransactionInput): Promise<TransactionCreated> {
+  const { data } = await apiClient.patch<TransactionCreated>(`/transactions/${id}`, body);
+  return data;
+}

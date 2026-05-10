@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { fetchCategories } from "../../api/categories";
 import {
   addTransaction,
   deleteTransaction,
+  editTransaction,
   fetchTransactions,
+  type EditTransactionInput,
   type ListTransactionsParams,
   type TransactionRow,
 } from "../../api/transactions";
@@ -51,18 +53,47 @@ type TypeFilter = "all" | "income" | "expense";
 
 export default function TransactionsPage() {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [month, setMonth] = useState(currentMonthValue);
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const typeFilter = useMemo((): TypeFilter => {
+    const t = searchParams.get("type");
+    if (t === "income" || t === "expense") {
+      return t;
+    }
+    return "all";
+  }, [searchParams]);
   const [categoryFilter, setCategoryFilter] = useState<string>("");
 
-  const [modalOpen, setModalOpen] = useState(false);
+  function updateTypeFilter(next: TypeFilter) {
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        if (next === "all") {
+          p.delete("type");
+        } else {
+          p.set("type", next);
+        }
+        return p;
+      },
+      { replace: true },
+    );
+  }
+
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [formType, setFormType] = useState<"income" | "expense">("expense");
   const [formCategoryId, setFormCategoryId] = useState<string>("");
   const [formAmount, setFormAmount] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formDate, setFormDate] = useState(todayISODate);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const [editModalTx, setEditModalTx] = useState<TransactionRow | null>(null);
+  const [editCategoryId, setEditCategoryId] = useState("");
+  const [editAmount, setEditAmount] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [editFormError, setEditFormError] = useState<string | null>(null);
 
   const listParams = useMemo((): ListTransactionsParams => {
     const p: ListTransactionsParams = { month };
@@ -118,11 +149,23 @@ export default function TransactionsPage() {
     mutationFn: addTransaction,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      setModalOpen(false);
+      setAddModalOpen(false);
       setFormError(null);
     },
     onError: () => {
       setFormError("Не удалось сохранить. Проверьте категорию и сумму.");
+    },
+  });
+
+  const editMutation = useMutation({
+    mutationFn: ({ id, body }: { id: number; body: EditTransactionInput }) => editTransaction(id, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      setEditModalTx(null);
+      setEditFormError(null);
+    },
+    onError: () => {
+      setEditFormError("Не удалось сохранить изменения.");
     },
   });
 
@@ -133,7 +176,8 @@ export default function TransactionsPage() {
     },
   });
 
-  function openModal() {
+  function openAddModal() {
+    editMutation.reset();
     addMutation.reset();
     setFormType("expense");
     setFormCategoryId("");
@@ -141,13 +185,31 @@ export default function TransactionsPage() {
     setFormDescription("");
     setFormDate(todayISODate());
     setFormError(null);
-    setModalOpen(true);
+    setAddModalOpen(true);
   }
 
-  function closeModal() {
+  function closeAddModal() {
     if (!addMutation.isPending) {
-      setModalOpen(false);
+      setAddModalOpen(false);
       setFormError(null);
+    }
+  }
+
+  function openEditModal(tx: TransactionRow) {
+    addMutation.reset();
+    editMutation.reset();
+    setEditModalTx(tx);
+    setEditCategoryId(String(tx.categoryId));
+    setEditAmount(String(parseAmount(tx.amount)));
+    setEditDescription(tx.description ?? "");
+    setEditDate(tx.date.length >= 10 ? tx.date.slice(0, 10) : tx.date);
+    setEditFormError(null);
+  }
+
+  function closeEditModal() {
+    if (!editMutation.isPending) {
+      setEditModalTx(null);
+      setEditFormError(null);
     }
   }
 
@@ -156,8 +218,15 @@ export default function TransactionsPage() {
     [categories, formType],
   );
 
+  const categoriesForEdit = useMemo(() => {
+    if (editModalTx === null) {
+      return [];
+    }
+    return categories.filter((c) => c.type === editModalTx.type);
+  }, [categories, editModalTx]);
+
   useEffect(() => {
-    if (!modalOpen) {
+    if (!addModalOpen) {
       return;
     }
     const current = formCategoryId !== "" ? Number.parseInt(formCategoryId, 10) : NaN;
@@ -165,7 +234,7 @@ export default function TransactionsPage() {
     if (cat !== undefined && cat.type !== formType) {
       setFormCategoryId("");
     }
-  }, [formType, modalOpen, formCategoryId, categoryById]);
+  }, [formType, addModalOpen, formCategoryId, categoryById]);
 
   function handleSubmitModal(e: FormEvent) {
     e.preventDefault();
@@ -189,6 +258,33 @@ export default function TransactionsPage() {
     });
   }
 
+  function handleSubmitEditModal(e: FormEvent) {
+    e.preventDefault();
+    if (editModalTx === null) {
+      return;
+    }
+    setEditFormError(null);
+    const catId = Number.parseInt(editCategoryId, 10);
+    if (!Number.isFinite(catId) || catId <= 0) {
+      setEditFormError("Выберите категорию.");
+      return;
+    }
+    const amount = Number.parseFloat(editAmount.replace(",", "."));
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setEditFormError("Укажите сумму больше нуля.");
+      return;
+    }
+    editMutation.mutate({
+      id: editModalTx.id,
+      body: {
+        categoryId: catId,
+        amount,
+        description: editDescription.trim() === "" ? null : editDescription.trim(),
+        date: editDate,
+      },
+    });
+  }
+
   const isLoading = transactionsQuery.isPending || categoriesQuery.isPending;
   const isError = transactionsQuery.isError || categoriesQuery.isError;
 
@@ -201,7 +297,7 @@ export default function TransactionsPage() {
           </Link>
           <h1 className={styles.title}>Транзакции</h1>
         </div>
-        <button type="button" className={styles.addBtn} onClick={openModal}>
+        <button type="button" className={styles.addBtn} onClick={openAddModal}>
           Добавить
         </button>
       </header>
@@ -223,21 +319,21 @@ export default function TransactionsPage() {
               <button
                 type="button"
                 className={`${styles.typeBtn} ${typeFilter === "all" ? styles.typeBtnActive : ""}`}
-                onClick={() => setTypeFilter("all")}
+                onClick={() => updateTypeFilter("all")}
               >
                 Все
               </button>
               <button
                 type="button"
                 className={`${styles.typeBtn} ${typeFilter === "income" ? styles.typeBtnActive : ""}`}
-                onClick={() => setTypeFilter("income")}
+                onClick={() => updateTypeFilter("income")}
               >
                 Доходы
               </button>
               <button
                 type="button"
                 className={`${styles.typeBtn} ${typeFilter === "expense" ? styles.typeBtnActive : ""}`}
-                onClick={() => setTypeFilter("expense")}
+                onClick={() => updateTypeFilter("expense")}
               >
                 Расходы
               </button>
@@ -275,6 +371,7 @@ export default function TransactionsPage() {
                     const cat = categoryById.get(t.categoryId);
                     const icon = cat?.icon ?? "•";
                     const deleting = deleteMutation.isPending && deleteMutation.variables === t.id;
+                    const editing = editMutation.isPending && editMutation.variables?.id === t.id;
                     return (
                       <div key={t.id} className={styles.row}>
                         <span className={styles.icon} aria-hidden>
@@ -294,16 +391,28 @@ export default function TransactionsPage() {
                           {t.type === "income" ? "+" : "−"}
                           {formatMoney(parseAmount(t.amount))}
                         </span>
-                        <button
-                          type="button"
-                          className={styles.deleteBtn}
-                          title="Удалить"
-                          aria-label="Удалить транзакцию"
-                          disabled={deleting}
-                          onClick={() => deleteMutation.mutate(t.id)}
-                        >
-                          ×
-                        </button>
+                        <div className={styles.rowActions}>
+                          <button
+                            type="button"
+                            className={styles.editBtn}
+                            title="Редактировать"
+                            aria-label="Редактировать транзакцию"
+                            disabled={editing || deleting}
+                            onClick={() => openEditModal(t)}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.deleteBtn}
+                            title="Удалить"
+                            aria-label="Удалить транзакцию"
+                            disabled={deleting || editing}
+                            onClick={() => deleteMutation.mutate(t.id)}
+                          >
+                            ×
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -314,18 +423,18 @@ export default function TransactionsPage() {
         ) : null}
       </main>
 
-      {modalOpen ? (
+      {addModalOpen ? (
         <div
           className={styles.overlay}
           role="presentation"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
-              closeModal();
+              closeAddModal();
             }
           }}
         >
-          <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="modal-title">
-            <h2 id="modal-title" className={styles.modalTitle}>
+          <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="modal-add-title">
+            <h2 id="modal-add-title" className={styles.modalTitle}>
               Новая транзакция
             </h2>
             <form onSubmit={handleSubmitModal}>
@@ -405,11 +514,101 @@ export default function TransactionsPage() {
               {formError !== null ? <p className={styles.formError}>{formError}</p> : null}
 
               <div className={styles.modalActions}>
-                <button type="button" className={styles.btnGhost} onClick={closeModal}>
+                <button type="button" className={styles.btnGhost} onClick={closeAddModal}>
                   Отмена
                 </button>
                 <button type="submit" className={styles.btnPrimary} disabled={addMutation.isPending}>
                   {addMutation.isPending ? "Сохранение…" : "Сохранить"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {editModalTx !== null ? (
+        <div
+          className={styles.overlay}
+          role="presentation"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeEditModal();
+            }
+          }}
+        >
+          <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="modal-edit-title">
+            <h2 id="modal-edit-title" className={styles.modalTitle}>
+              Редактировать транзакцию
+            </h2>
+            <form onSubmit={handleSubmitEditModal}>
+              <div className={styles.modalTypeLocked}>
+                <span className={styles.modalTypeLockedLabel}>Тип</span>
+                <span className={styles.modalTypeLockedValue}>
+                  {editModalTx.type === "income" ? "Доход" : "Расход"}
+                </span>
+              </div>
+
+              <div className={styles.formField}>
+                <label htmlFor="tx-edit-category">Категория</label>
+                <select
+                  id="tx-edit-category"
+                  value={editCategoryId}
+                  onChange={(e) => setEditCategoryId(e.target.value)}
+                  required
+                >
+                  <option value="">Выберите категорию</option>
+                  {categoriesForEdit.map((c) => (
+                    <option key={c.id} value={String(c.id)}>
+                      {c.icon} {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.formField}>
+                <label htmlFor="tx-edit-amount">Сумма</label>
+                <input
+                  id="tx-edit-amount"
+                  type="number"
+                  inputMode="decimal"
+                  min={0.01}
+                  step={0.01}
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className={styles.formField}>
+                <label htmlFor="tx-edit-desc">Описание</label>
+                <input
+                  id="tx-edit-desc"
+                  type="text"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Необязательно"
+                />
+              </div>
+
+              <div className={styles.formField}>
+                <label htmlFor="tx-edit-date">Дата</label>
+                <input
+                  id="tx-edit-date"
+                  type="date"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  required
+                />
+              </div>
+
+              {editFormError !== null ? <p className={styles.formError}>{editFormError}</p> : null}
+
+              <div className={styles.modalActions}>
+                <button type="button" className={styles.btnGhost} onClick={closeEditModal}>
+                  Отмена
+                </button>
+                <button type="submit" className={styles.btnPrimary} disabled={editMutation.isPending}>
+                  {editMutation.isPending ? "Сохранение…" : "Сохранить"}
                 </button>
               </div>
             </form>

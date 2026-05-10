@@ -294,12 +294,48 @@
   color: #c2410c;
 }
 
+.rowActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
 @media (prefers-color-scheme: dark) {
   .amountIncome {
     color: #4ade80;
   }
   .amountExpense {
     color: #fb923c;
+  }
+}
+
+.editBtn {
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0.35rem 0.45rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.editBtn:hover:not(:disabled) {
+  background: rgba(79, 70, 229, 0.12);
+  color: #4f46e5;
+}
+
+.editBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (prefers-color-scheme: dark) {
+  .editBtn:hover:not(:disabled) {
+    background: rgba(129, 140, 248, 0.2);
+    color: #a5b4fc;
   }
 }
 
@@ -408,6 +444,40 @@
   background: rgba(99, 102, 241, 0.2);
   border-color: #6366f1;
   font-weight: 600;
+}
+
+.modalTypeLocked {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.modalTypeLockedLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.modalTypeLockedValue {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.45rem;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .modalTypeLockedLabel {
+    color: #94a3b8;
+  }
+
+  .modalTypeLockedValue {
+    color: #f1f5f9;
+    background: rgba(0, 0, 0, 0.25);
+  }
 }
 
 .formField {

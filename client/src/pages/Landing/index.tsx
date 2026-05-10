@@ -87,32 +87,34 @@ export default function LandingPage() {
               ☰
             </button>
           </div>
-          <nav
-            className={`${styles.navLinks} ${menuOpen ? styles.navLinksMobileOpen : ""}`}
-            aria-label="Основная навигация"
+          <div
+            className={`${styles.mobileMenu} ${menuOpen ? styles.mobileMenuOpen : ""}`}
+            id="landing-nav-menu"
           >
-            <a
-              href="#features"
-              className={styles.navAnchor}
-              onClick={() => setMenuOpen(false)}
-            >
-              Возможности
-            </a>
-            <a
-              href="#contacts"
-              className={styles.navAnchor}
-              onClick={() => setMenuOpen(false)}
-            >
-              Контакты
-            </a>
-          </nav>
-          <div className={styles.navActions}>
-            <Link to="/login" className={styles.btnGhost}>
-              Войти
-            </Link>
-            <Link to="/register" className={styles.btnPrimarySm}>
-              Зарегистрироваться
-            </Link>
+            <nav className={styles.navLinks} aria-label="Основная навигация">
+              <a
+                href="#features"
+                className={styles.navAnchor}
+                onClick={() => setMenuOpen(false)}
+              >
+                Возможности
+              </a>
+              <a
+                href="#contacts"
+                className={styles.navAnchor}
+                onClick={() => setMenuOpen(false)}
+              >
+                Контакты
+              </a>
+            </nav>
+            <div className={styles.navActions}>
+              <Link to="/login" className={styles.btnGhost}>
+                Войти
+              </Link>
+              <Link to="/register" className={styles.btnPrimarySm}>
+                Зарегистрироваться
+              </Link>
+            </div>
           </div>
         </div>
       </header>
