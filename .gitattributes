@@ -1,0 +1,2 @@
+# Скрипты деплоя должны оставаться с LF, иначе на Linux ломается shebang и bash.
+*.sh text eol=lf

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-export const AUTH_STORAGE_KEY = "finan-auth";
+export const AUTH_STORAGE_KEY = "financheck-auth";
 
 export type AuthUser = {
   id: number;

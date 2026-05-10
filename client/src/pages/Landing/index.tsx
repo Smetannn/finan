@@ -53,20 +53,8 @@ function HeroIllustration() {
   );
 }
 
-const SCROLL_SOLID_THRESHOLD = 24;
-
 export default function LandingPage() {
-  const [navSolid, setNavSolid] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    function onScroll() {
-      setNavSolid(window.scrollY > SCROLL_SOLID_THRESHOLD);
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (!menuOpen) {
@@ -83,14 +71,11 @@ export default function LandingPage() {
 
   return (
     <div className={styles.page}>
-      <header
-        className={`${styles.navWrap} ${navSolid ? styles.navSolid : styles.navHero}`}
-        role="banner"
-      >
+      <header className={styles.navWrap} role="banner">
         <div className={styles.navInner}>
           <div className={styles.navRow1}>
             <Link to="/" className={styles.logo}>
-              Finan
+              FinanCheck
             </Link>
             <button
               type="button"
@@ -208,24 +193,24 @@ export default function LandingPage() {
         <div className={styles.contactList}>
           <div className={styles.contactRow}>
             <span className={styles.contactLabel}>Email</span>
-            <a href="mailto:support@finan.ru">support@finan.ru</a>
+            <a href="mailto:egorsmetanin2006@gmail.com">egorsmetanin2006@gmail.com</a>
           </div>
           <div className={styles.contactRow}>
             <span className={styles.contactLabel}>Telegram</span>
-            <a href="https://t.me/finan_support" target="_blank" rel="noopener noreferrer">
-              @finan_support
+            <a href="https://t.me/Smetannn" target="_blank" rel="noopener noreferrer">
+              @Smetannn
             </a>
           </div>
           <div className={styles.contactRow}>
             <span className={styles.contactLabel}>GitHub</span>
-            <a href="https://github.com/finan" target="_blank" rel="noopener noreferrer">
-              github.com/finan
+            <a href="https://github.com/Smetannn/finan" target="_blank" rel="noopener noreferrer">
+              github.com/Smetannn/finan
             </a>
           </div>
         </div>
       </section>
 
-      <footer className={styles.footer}>© 2026 Finan. Все права защищены.</footer>
+      <footer className={styles.footer}>© 2026 FinanCheck. Все права защищены.</footer>
     </div>
   );
 }

@@ -16,7 +16,7 @@
   }
 }
 
-/* ——— Navbar ——— */
+/* ——— Navbar (всегда белый фон, без смены при скролле) ——— */
 .navWrap {
   position: fixed;
   top: 0;
@@ -28,32 +28,9 @@
   align-items: center;
   justify-content: center;
   padding: 0.45rem 0;
-  transition:
-    background 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
-  border-bottom: 1px solid transparent;
-  background: transparent;
-}
-
-.navSolid {
-  background: rgba(255, 255, 255, 0.92);
-  border-bottom-color: rgba(15, 23, 42, 0.08);
-  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
-  backdrop-filter: blur(12px);
-}
-
-@media (prefers-color-scheme: dark) {
-  .navSolid {
-    background: rgba(15, 23, 42, 0.92);
-    border-bottom-color: rgba(148, 163, 184, 0.12);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
-  }
-}
-
-.navHero {
-  background: rgba(26, 26, 46, 0.35);
-  border-bottom-color: rgba(255, 255, 255, 0.06);
+  background: #ffffff;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .navInner {
@@ -85,34 +62,16 @@
   font: inherit;
   font-size: 1.35rem;
   line-height: 1;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(15, 23, 42, 0.18);
   border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(15, 23, 42, 0.04);
+  color: #334155;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .navBurger:hover {
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.navSolid .navBurger {
-  border-color: rgba(15, 23, 42, 0.18);
-  background: rgba(15, 23, 42, 0.06);
-  color: #334155;
-}
-
-.navSolid .navBurger:hover {
-  background: rgba(15, 23, 42, 0.1);
-}
-
-@media (prefers-color-scheme: dark) {
-  .navSolid .navBurger {
-    color: #e2e8f0;
-    border-color: rgba(148, 163, 184, 0.35);
-    background: rgba(30, 41, 59, 0.6);
-  }
+  background: rgba(15, 23, 42, 0.08);
 }
 
 @media (min-width: 768px) {
@@ -138,19 +97,9 @@
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  color: #fff;
+  color: #4f46e5;
   text-decoration: none;
   flex-shrink: 0;
-}
-
-.navSolid .logo {
-  color: #4f46e5;
-}
-
-@media (prefers-color-scheme: dark) {
-  .navSolid .logo {
-    color: #a5b4fc;
-  }
 }
 
 .navLinks {
@@ -161,21 +110,11 @@
   gap: 0;
   padding: 0.35rem 0 0.5rem;
   margin: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .navLinksMobileOpen {
   display: flex;
-}
-
-.navSolid .navLinks {
-  border-top-color: rgba(15, 23, 42, 0.08);
-}
-
-@media (prefers-color-scheme: dark) {
-  .navSolid .navLinks {
-    border-top-color: rgba(148, 163, 184, 0.15);
-  }
 }
 
 @media (min-width: 768px) {
@@ -199,30 +138,13 @@
 .navAnchor {
   font-size: 0.9rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.88);
+  color: #475569;
   text-decoration: none;
   padding: 0.6rem 0.15rem;
 }
 
 .navAnchor:hover {
-  color: #fff;
-}
-
-.navSolid .navAnchor {
-  color: #475569;
-}
-
-.navSolid .navAnchor:hover {
   color: #4f46e5;
-}
-
-@media (prefers-color-scheme: dark) {
-  .navSolid .navAnchor {
-    color: #cbd5e1;
-  }
-  .navSolid .navAnchor:hover {
-    color: #a5b4fc;
-  }
 }
 
 .navActions {
@@ -249,9 +171,9 @@
   font-weight: 600;
   padding: 0.45rem 0.9rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(15, 23, 42, 0.15);
   background: transparent;
-  color: #fff;
+  color: #334155;
   text-decoration: none;
   cursor: pointer;
   display: inline-flex;
@@ -260,23 +182,7 @@
 }
 
 .btnGhost:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.navSolid .btnGhost {
-  border-color: rgba(15, 23, 42, 0.15);
-  color: #334155;
-}
-
-.navSolid .btnGhost:hover {
   background: rgba(15, 23, 42, 0.05);
-}
-
-@media (prefers-color-scheme: dark) {
-  .navSolid .btnGhost {
-    color: #e2e8f0;
-    border-color: rgba(148, 163, 184, 0.3);
-  }
 }
 
 .btnPrimarySm {

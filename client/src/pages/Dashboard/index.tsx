@@ -166,7 +166,7 @@ export default function Dashboard() {
       <header className={styles.header}>
         <div className={styles.headerNav}>
           <Link to="/dashboard" className={styles.brand}>
-            Finan
+            FinanCheck
           </Link>
           <Link to="/analytics" className={styles.navLink}>
             Аналитика
